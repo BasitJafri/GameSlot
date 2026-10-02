@@ -4,6 +4,7 @@ import { BookingProvider } from './context/BookingContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AdminNavbar } from './components/layout/AdminNavbar';
+import { ScrollToTop } from './components/layout/ScrollToTop';
 
 // Public pages
 import { HomePage }       from './pages/public/HomePage';
@@ -81,6 +82,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       {/* ── Public routes (Navbar + Footer) ── */}
       <Route element={<PublicLayout />}>
@@ -142,6 +145,7 @@ function AppRoutes() {
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
 

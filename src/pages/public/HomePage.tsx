@@ -75,15 +75,31 @@ export function HomePage() {
     <div className="min-h-screen bg-primary">
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gaming-gradient" />
-        <div className="absolute inset-0 bg-hero-gradient" />
-        <div className="absolute inset-0 grid-bg opacity-40" />
-        {/* Decorative blobs */}
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-secondary/8 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-24">
+        {/* ── Video background ──────────────────────────────── */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ zIndex: 0 }}
+        >
+          <source src="/videos/hero.mp4" type="video/mp4" />
+          {/* Fallback gradient if video fails to load */}
+        </video>
+
+        {/* Dark overlay — keeps text readable over the video */}
+        <div className="absolute inset-0 bg-black/60" style={{ zIndex: 1 }} />
+
+        {/* Subtle green tint at top for brand feel */}
+        <div className="absolute inset-0 bg-hero-gradient" style={{ zIndex: 2 }} />
+
+        {/* Grid texture overlay */}
+        <div className="absolute inset-0 grid-bg opacity-20" style={{ zIndex: 2 }} />
+
+        {/* Content */}
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-24" style={{ zIndex: 3 }}>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-8 animate-fadeIn">
             <Zap size={14} />
             Islamabad's Premier Gaming Hub
@@ -93,7 +109,7 @@ export function HomePage() {
             <br />
             <span className="gradient-text">Gaming Experience</span>
           </h1>
-          <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fadeIn">
+          <p className="text-gray-300 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fadeIn">
             State-of-the-art gaming stations, competitive esports arenas, and an elite community — all in the heart of Islamabad.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeIn">
@@ -106,7 +122,7 @@ export function HomePage() {
             </Button>
           </div>
           {/* Scroll indicator */}
-          <div className="mt-20 flex flex-col items-center gap-2 text-gray-600 animate-float">
+          <div className="mt-20 flex flex-col items-center gap-2 text-gray-400 animate-float">
             <span className="text-xs uppercase tracking-widest">Scroll</span>
             <ChevronDown size={18} />
           </div>

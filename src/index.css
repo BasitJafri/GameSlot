@@ -9,7 +9,11 @@
   --color-secondary: #7c3aed;
 }
 
-* {
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
   scroll-behavior: smooth;
 }
 
