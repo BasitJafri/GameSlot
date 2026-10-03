@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Monitor, Gamepad2, Glasses, Trophy, ArrowRight, ChevronDown,
@@ -6,9 +6,38 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { TextEffect } from '../../components/core/TextEffect';
+import { InView } from '../../components/core/InView';
+import { AnimatedNumber } from '../../components/core/AnimatedNumber';
 import { mockTestimonials, bookedBlocks } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
-import { getBookingDates, getDayLabel, formatDateShort } from '../../utils/helpers';
+import { getBookingDates, formatDateShort } from '../../utils/helpers';
+
+const HERO_PHRASES = [
+  'Gaming Experience',
+  'Esports Journey',
+  'Next Level Session',
+  'Competitive Edge',
+];
+
+const blurSlideVariants = {
+  container: {
+    hidden:  { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.035 } },
+    exit:    { transition: { staggerChildren: 0.025, staggerDirection: 1 } },
+  },
+  item: {
+    hidden:  { opacity: 0, filter: 'blur(10px) brightness(0%)', y: 0 },
+    visible: {
+      opacity: 1, y: 0, filter: 'blur(0px) brightness(100%)',
+      transition: { duration: 0.4 },
+    },
+    exit: {
+      opacity: 0, y: -30, filter: 'blur(10px) brightness(0%)',
+      transition: { duration: 0.35 },
+    },
+  },
+};
 
 const experienceCards = [
   {
@@ -58,6 +87,22 @@ export function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const dates = getBookingDates();
 
+  // ── Cycling hero phrase ──────────────────────────────────
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [trigger,   setTrigger]   = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTrigger(false);
+      setTimeout(() => {
+        setPhraseIdx((i) => (i + 1) % HERO_PHRASES.length);
+        setTrigger(true);
+      }, 420);
+    }, 3000);
+    return () => clearInterval(id);
+  }, []);
+  // ─────────────────────────────────────────────────────────
+
   const handleBookNow = () => {
     if (isAuthenticated) {
       navigate('/book');
@@ -67,7 +112,6 @@ export function HomePage() {
     }
   };
 
-  // Show today's booked blocks for the preview section
   const todayDate = dates[0];
   const todayBookedBlocks = bookedBlocks[todayDate] ?? [];
 
@@ -104,10 +148,19 @@ export function HomePage() {
             <Zap size={14} />
             Islamabad's Premier Gaming Hub
           </div>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.05] mb-6 animate-fadeIn">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] mb-6 text-white">
             Level Up Your
             <br />
-            <span className="gradient-text">Gaming Experience</span>
+            <span className="inline-flex justify-center w-full min-h-[1.1em]">
+              <TextEffect
+                per="char"
+                trigger={trigger}
+                slotVariants={blurSlideVariants}
+                className="gradient-text-light"
+              >
+                {HERO_PHRASES[phraseIdx]}
+              </TextEffect>
+            </span>
           </h1>
           <p className="text-gray-300 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fadeIn">
             State-of-the-art gaming stations, competitive esports arenas, and an elite community — all in the heart of Islamabad.
@@ -133,17 +186,23 @@ export function HomePage() {
       <section className="bg-primary-light border-y border-white/[0.06]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { label: 'Gamers Served', value: '500+', icon: Users },
-              { label: 'Gaming Stations', value: '50+', icon: Cpu },
-              { label: 'Support', value: '24/7', icon: Clock },
-              { label: 'Established', value: '2023', icon: Star },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
+            {([
+              { label: 'Gamers Served',   num: 500,  suffix: '+', icon: Users },
+              { label: 'Gaming Stations', num: 50,   suffix: '+', icon: Cpu },
+              { label: 'Support',         num: null,  text: '24/7', icon: Clock },
+              { label: 'Established',     num: 2023,  suffix: '',  icon: Star },
+            ] as const).map((stat) => (
+              <InView key={stat.label} className="text-center">
                 <stat.icon size={24} className="text-accent mx-auto mb-2" />
-                <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
+                <div className="text-3xl font-black text-white mb-1">
+                  {'num' in stat && stat.num !== null ? (
+                    <><AnimatedNumber value={stat.num} />{stat.suffix}</>
+                  ) : (
+                    stat.text
+                  )}
+                </div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
-              </div>
+              </InView>
             ))}
           </div>
         </div>
@@ -153,6 +212,7 @@ export function HomePage() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <InView delay={0.05}>
             <div>
               <div className="text-accent text-sm font-semibold uppercase tracking-widest mb-4">About Game Inn</div>
               <h2 className="text-4xl font-black text-white mb-6 leading-tight">
@@ -168,6 +228,8 @@ export function HomePage() {
                 Our Story <ArrowRight size={16} />
               </Button>
             </div>
+            </InView>
+            <InView delay={0.15}>
             <div className="relative h-80 lg:h-96 rounded-2xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-surface to-secondary/10 border border-white/08 rounded-2xl flex items-center justify-center">
                 <div className="text-center">
@@ -179,6 +241,7 @@ export function HomePage() {
               <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-accent rounded-tl-xl" />
               <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-accent rounded-br-xl" />
             </div>
+            </InView>
           </div>
         </div>
       </section>
@@ -186,13 +249,14 @@ export function HomePage() {
       {/* Experience cards */}
       <section className="py-24 bg-primary-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
+          <InView className="text-center mb-14">
             <div className="text-accent text-sm font-semibold uppercase tracking-widest mb-3">What We Offer</div>
             <h2 className="text-4xl font-black text-white">The Gaming Experience</h2>
-          </div>
+          </InView>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {experienceCards.map((card) => (
-              <Card key={card.title} hover className="text-center group">
+            {experienceCards.map((card, i) => (
+              <InView key={card.title} delay={i * 0.08}>
+              <Card hover className="text-center group h-full">
                 <div
                   className={[
                     'w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center',
@@ -209,6 +273,7 @@ export function HomePage() {
                 <h3 className="font-bold text-white mb-3 text-base">{card.title}</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">{card.desc}</p>
               </Card>
+              </InView>
             ))}
           </div>
         </div>
@@ -217,18 +282,19 @@ export function HomePage() {
       {/* How It Works */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
+          <InView className="text-center mb-14">
             <div className="text-accent text-sm font-semibold uppercase tracking-widest mb-3">Simple Process</div>
             <h2 className="text-4xl font-black text-white">How It Works</h2>
-          </div>
+          </InView>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-8 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
             {[
               { step: '01', icon: Monitor, title: 'Browse & Select', desc: 'Choose your date and preferred gaming session from available slots.' },
               { step: '02', icon: Clock, title: 'Book & Pay Advance', desc: 'Confirm your details and pay a small advance to secure your slot.' },
               { step: '03', icon: Trophy, title: 'Arrive & Play', desc: 'Show up, pay the remaining balance, and dominate your session.' },
-            ].map((item) => (
-              <div key={item.step} className="text-center relative">
+            ].map((item, i) => (
+              <InView key={item.step} delay={i * 0.1}>
+              <div className="text-center relative">
                 <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 mx-auto mb-5 flex items-center justify-center">
                   <item.icon size={28} className="text-accent" />
                 </div>
@@ -236,6 +302,7 @@ export function HomePage() {
                 <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
                 <p className="text-gray-400 leading-relaxed">{item.desc}</p>
               </div>
+              </InView>
             ))}
           </div>
         </div>
@@ -296,13 +363,14 @@ export function HomePage() {
       {/* Testimonials */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
+          <InView className="text-center mb-14">
             <div className="text-accent text-sm font-semibold uppercase tracking-widest mb-3">Community</div>
             <h2 className="text-4xl font-black text-white">What Gamers Say</h2>
-          </div>
+          </InView>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {mockTestimonials.map((t) => (
-              <Card key={t.id} className="flex flex-col gap-4">
+            {mockTestimonials.map((t, i) => (
+              <InView key={t.id} delay={i * 0.1}>
+              <Card className="flex flex-col gap-4 h-full">
                 <div className="flex text-accent gap-0.5">
                   {Array.from({ length: t.rating }).map((_, i) => (
                     <Star key={i} size={14} fill="currentColor" />
@@ -314,11 +382,12 @@ export function HomePage() {
                     {t.avatar}
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{t.name}</p>
-                    <p className="text-gray-500 text-xs">{t.location}</p>
-                  </div>
+                  <p className="text-white font-semibold text-sm">{t.name}</p>
+                  <p className="text-gray-500 text-xs">{t.location}</p>
                 </div>
-              </Card>
+              </div>
+            </Card>
+            </InView>
             ))}
           </div>
         </div>
@@ -404,7 +473,7 @@ export function HomePage() {
           <div className="relative rounded-3xl bg-gradient-to-br from-accent/10 via-surface to-secondary/10 border border-accent/20 p-12 sm:p-20 text-center overflow-hidden">
             <div className="absolute inset-0 grid-bg opacity-30" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-accent/5 rounded-full blur-[80px]" />
-            <div className="relative z-10">
+            <InView className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-black text-white mb-5">
                 Ready to <span className="gradient-text">Game?</span>
               </h2>
@@ -415,7 +484,7 @@ export function HomePage() {
                 Book Your Slot Now
                 <ArrowRight size={20} />
               </Button>
-            </div>
+            </InView>
           </div>
         </div>
       </section>

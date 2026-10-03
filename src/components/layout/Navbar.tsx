@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, User, ChevronDown, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
+import { ScrollProgress } from '../core/ScrollProgress';
 
 const navLinks = [
   { to: '/',           label: 'Home' },
@@ -60,6 +61,8 @@ export function Navbar() {
 
   return (
     <>
+      <ScrollProgress />
+
       {/* ── Fixed top bar ───────────────────────────────────── */}
       <nav
         className={[
